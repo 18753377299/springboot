@@ -15,7 +15,8 @@ spring:
     test-on-borrow: false
     test-while-idle: true
     time-between-eviction-runs-millis: 18800
-    jdbc-interceptors: ConnectionState;SlowQueryReport(threshold=0) 
+    jdbc-interceptors: ConnectionState;SlowQueryReport(threshold=0)
+    type: com.alibaba.druid.pool.DruidDataSource
   profiles:
     active: local
   application: 
@@ -31,7 +32,10 @@ spring:
       max-file-size: 200MB
 #      设置一次请求上传文件的总容量
       max-request-size: 200MB
-    
+# cache缓存配置
+  cache: 
+    ehcache:
+      config: ehcache.xml
 mybatis: 
   mapperLocations: classpath*:mapper/**/*Dao.xml
   executor-type: REUSE 

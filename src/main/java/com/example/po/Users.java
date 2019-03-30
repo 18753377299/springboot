@@ -1,9 +1,16 @@
 package com.example.po;
 
+import java.io.Serializable;
+
 import lombok.Data;
 
 @Data
-public class Users {
+public class Users implements Serializable{
+	
+	/**
+	 * 序列化
+	 */
+	private static final long serialVersionUID = 1L;
 	
 	private Integer id;
 	private Integer age;

@@ -10,4 +10,8 @@ public interface UserDao {
 	public List<Users> selectByAll();
 	
 	public void addUser(Users users);
+	
+	public Users selectById();
+	
+	
 }

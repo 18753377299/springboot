@@ -45,9 +45,15 @@ public class UserController {
 		System.out.println("success");
 //		Users user =new Users(12,"zhangsan");
 //		userService.addUser(user);	
-		userService.selectByAll();
-		String aa= userService.getUserCode();
-		System.out.println("++++++++++++++++++++++"+aa);
+//		userService.selectByAll();
+		
+		System.out.println(userService.selectById());
+		
+		Users user =new Users(12,"zhangsan");
+		userService.addUser(user);
+		System.out.println("====================after");
+		System.out.println(userService.selectById());
+		
 		return "showUser";
 	}
 	

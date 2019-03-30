@@ -81,6 +81,23 @@
 		    <version>0.9.0</version>
 		</dependency>
 		
+		<!-- Spring Boot 缓存支持启动器 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<!--Ehcache 坐标 -->
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+		    <artifactId>ehcache</artifactId>
+		</dependency>
+		<!-- Spring Data Redis 的启动器 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		
 		<!-- 修改后立即生效，热部署 -->
 		<dependency>
 			<groupId>org.springframework</groupId>
