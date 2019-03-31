@@ -36,6 +36,18 @@ spring:
   cache: 
     ehcache:
       config: ehcache.xml
+#  配置redis信息，需要从程序中获取，如果不配置获取的方式@ConfigurationProperties(prefix="spring.redis")，
+#  则会选择默认方式获取，但是如果修改了密码的话，则会出错，获取不到信息
+  redis:  
+    pool: 
+     max-idle: 10
+     min-idle: 5
+     max-wait: 20
+    host: localhost
+    port: 6379
+    database: 0
+    password: 1234
+    
 mybatis: 
   mapperLocations: classpath*:mapper/**/*Dao.xml
   executor-type: REUSE 
