@@ -23,7 +23,8 @@ public class DatasetVectorUnion {
 		workspaceConnectionInfo.setType(WorkspaceType.SMWU);
 
 //		String  file = "F:/A_supermap/superMap_file/Dissovle/dissolveDatasetVector/data/dissovle.smwu";
-		String  file = "F:/A_supermap/superMap_file/Dissovle/data/dissovle.smwu";
+//		String  file = "F:/A_supermap/superMap_file/Dissovle/data/dissovle.smwu";
+		String  file = "/home/supermapData/test/data/dissovle.smwu";
 //		String file =filePath.getString("filePath");
 		workspaceConnectionInfo.setServer(file);
 		workspace.open(workspaceConnectionInfo); 
@@ -40,10 +41,10 @@ public class DatasetVectorUnion {
 		DatasetVector dtv1=(DatasetVector) datasets.get("DatasetVector1");
 		System.out.println(dtv.getName());
 		System.out.println(dtv1.getName());
-//		 String name = datasets.getAvailableDatasetName("河流");
+		 String name = datasets.getAvailableDatasetName("河流");
 //		// 设置矢量数据集的信息
         DatasetVectorInfo datasetVectorInfo = new DatasetVectorInfo();
-//        datasetVectorInfo.setName(name);
+        datasetVectorInfo.setName(name);
         datasetVectorInfo.setType(DatasetType.REGION );
         datasetVectorInfo.setEncodeType(EncodeType.NONE);
         datasetVectorInfo.setFileCache(true);

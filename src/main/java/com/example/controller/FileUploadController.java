@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.common.response.ResponseResult;
 import com.supermap.data.CursorType;
 import com.supermap.data.DatasetType;
 import com.supermap.data.DatasetVector;
@@ -56,16 +57,18 @@ public class FileUploadController {
 	 * @throws IllegalStateException 
 	 * */
 	@RequestMapping(value="/fileGeometrist",method= {RequestMethod.POST,RequestMethod.GET})
-	public String  fileGeometrist(@RequestBody RiskClaimVo riskClaimVo) {
+	public ResponseResult  fileGeometrist(@RequestBody RiskClaimVo riskClaimVo) {
 		System.out.println(riskClaimVo.getGeometrys());
-		
+		ResponseResult responseResult =new ResponseResult();
 		Workspace workspace = new Workspace();
 		WorkspaceConnectionInfo workspaceConnectionInfo = new WorkspaceConnectionInfo();
 		Datasource datasource = new Datasource(EngineType.UDB);
 		workspaceConnectionInfo.setType(WorkspaceType.SMWU);
 
 //		String  file = "F:/A_supermap/superMap_file/Dissovle/dissolveDatasetVector/data/dissovle.smwu";
-		String  file = "F:/A_supermap/superMap_file/Dissovle/data/dissovle.smwu";
+//		String  file = "F:/A_supermap/superMap_file/Dissovle/data/dissovle.smwu";
+		String  file = "C:/Users/Administrator/Desktop/data/dissovle.smwu";
+		
 //		String file =filePath.getString("filePath");
 		workspaceConnectionInfo.setServer(file);
 		workspace.open(workspaceConnectionInfo); 
@@ -77,10 +80,10 @@ public class FileUploadController {
 	        System.out.println("数据源打开成功！");
 	    }
 		Datasets datasets = datasource.getDatasets();
-		 String name = datasets.getAvailableDatasetName("河流");
+		 String name = datasets.getAvailableDatasetName("河流1");
 		// 设置矢量数据集的信息
         DatasetVectorInfo datasetVectorInfo = new DatasetVectorInfo();
-//        datasetVectorInfo.setName(name);
+        datasetVectorInfo.setName(name);
         datasetVectorInfo.setType(DatasetType.REGION );
         datasetVectorInfo.setEncodeType(EncodeType.NONE);
         datasetVectorInfo.setFileCache(true);
@@ -118,6 +121,7 @@ public class FileUploadController {
         	recordset.addNew(geome);
         	geometryString = Toolkit.GemetryToGeoJson(geome);
         }
+        responseResult.setResult(geometryString);
         
 //        recordset.addNew(geometry);
         recordset.update();
@@ -138,7 +142,8 @@ public class FileUploadController {
 			// 释放该对象所占用的资源
 			workspace.dispose();
 		}
-		return geometryString;
+		
+		return responseResult;
 	}
 	
 	
