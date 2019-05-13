@@ -17,6 +17,7 @@ import com.supermap.data.WorkspaceType;
  * **/
 public class DatasetVectorUnion {
 	public static void main(String [] args) {
+		
 		Workspace workspace = new Workspace();
 		WorkspaceConnectionInfo workspaceConnectionInfo = new WorkspaceConnectionInfo();
 		Datasource datasource = new Datasource(EngineType.UDB);
