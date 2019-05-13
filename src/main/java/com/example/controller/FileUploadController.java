@@ -229,7 +229,7 @@ public class FileUploadController {
 		
 		return responseResult;
 	}
-	@RequestMapping(value="/returnGeometrist",method= {RequestMethod.POST,RequestMethod.GET})
+	@RequestMapping(value="/operatePointInfo",method= {RequestMethod.POST,RequestMethod.GET})
 	public ResponseResult  operatePointInfo() {
 		
 		ResponseResult responseResult =new ResponseResult();
