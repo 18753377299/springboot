@@ -230,6 +230,7 @@ public class FileUploadController {
 		
 		return responseResult;
 	}
+	
 	@RequestMapping(value="/operatePointInfo",method= {RequestMethod.POST,RequestMethod.GET})
 	public ResponseResult  operatePointInfo() {
 		
