@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.common.MapUtils;
 import com.example.common.response.ResponseResult;
+import com.example.po.SMDTV;
 import com.supermap.data.CursorType;
 import com.supermap.data.DatasetType;
 import com.supermap.data.DatasetVector;
@@ -241,16 +242,60 @@ public class FileUploadController {
 		Datasource datasource =MapUtils.connectDataSource(workspace,datasourceconnection,iobjectJavaServer,iobjectJavaDatabase,iobjectJavaUser,iobjectJavaPassword);
 		// 获取的面数据集
 //		TF_7M
-	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("TF_7M");
-	    
+	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("UnionTF_7_10");
 	    // 获取的点数据集
 	    DatasetVector datasetVector = (DatasetVector)datasource.getDatasets().get("RISKMAP_ADDRESS");
 	    
+//	    DatasetVector datasetVector = (DatasetVector)datasource.getDatasets().get("BB_1");
+	    int count =  datasetVector.getRecordCount();
+	    System.out.println("RISKMAP_ADDRESS总数为：" + count);
+	    
 	    QueryParameter parameter = new QueryParameter();
-		parameter.setSpatialQueryObject(datasetVector);
+		parameter.setSpatialQueryObject(datasetVector_7);
+//		parameter.setAttributeFilter("SmID<100000");
 		parameter.setSpatialQueryMode(SpatialQueryMode.INTERSECT);
 		
-		Recordset queryRecordset = datasetVector_7.query(parameter);
+		Recordset queryRecordset = datasetVector.query(parameter);
+		System.out.println("相交之后的点的数量："+queryRecordset.getRecordCount());
+		
+		List<SMDTV> smdtvList = new ArrayList<SMDTV>();
+		int i=0;
+		while (!queryRecordset.isEOF()) {
+			i++;
+			SMDTV smdtv =new SMDTV();
+			Object  SMID  = queryRecordset.getFieldValue("SMID");
+			Object  POINTX_2000  = queryRecordset.getFieldValue("POINTX_2000");
+			Object  POINTY_2000  = queryRecordset.getFieldValue("POINTY_2000");
+			
+//			MapUtils.queryCorporePInfo(SMID,POINTX_2000,POINTY_2000);
+			smdtv.setPointx_2000(POINTX_2000.toString());
+			smdtv.setPointy_2000(POINTY_2000.toString());
+			smdtvList.add(smdtv);
+//	        recordset.setValues(values);
+			queryRecordset.moveNext();
+			System.out.println("=============循环次数=============:"+i);
+	    }
+		responseResult.setResult(smdtvList);
+		responseResult.setStatusCode("1");
+		
+//		Map<Integer,Feature>  features= queryRecordset.getAllFeatures();
+//		List<SMDTV> smdtvList = new ArrayList<SMDTV>();
+//		if(queryRecordset.getRecordCount()>0){
+//			for(Feature feature:features.values()){
+//				SMDTV smdtv =new SMDTV();
+//				String  POINTX_2000 = feature.getString("POINTX_2000");
+//				String  POINTY_2000 = feature.getString("POINTY_2000");
+//				smdtv.setPointx_2000(POINTX_2000);
+//				smdtv.setPointy_2000(POINTY_2000);
+//				smdtvList.add(smdtv);
+//			}
+//			responseResult.setResult(smdtvList);
+//			responseResult.setStatusCode("1");
+//		}else {
+//			System.out.println("================没有数据");
+//		}
+		
+		System.out.println("================一切都结束了");
 		
 		if(parameter!=null){
 			parameter.dispose();

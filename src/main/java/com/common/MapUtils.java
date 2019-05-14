@@ -2,6 +2,12 @@ package com.common;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -155,7 +161,6 @@ public class MapUtils {
 			}
 			
 		}
-		
 		 // 批量操作统一提交
 //        editor.update();
 
@@ -275,6 +280,77 @@ public class MapUtils {
     public static double rad(double distance){
     	return distance * Math.PI / 180.0;
     }
+    
+    
+    public static void queryCorporePInfo(Object SMID,Object POINTX_2000,Object  POINTY_2000){
+		Connection connect = null;
+//        Statement statement = null;
+        PreparedStatement preState = null;
+        ResultSet resultSet = null;
+		try {
+//           Class.forName("oracle.jdbc.OracleDriver");
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+           
+           connect = DriverManager.getConnection("jdbc:oracle:thin:@10.10.68.248:1521:orcl", "riskcontrol", "riskcontrol");           
+
+          
+           System.out.println(connect);  
+           
+//         statement = connect.createStatement();
+          
+           String sql = "select * from RISKMAP_MAIN where SMID = ?";
+//           PreparedStatement preState = connect.prepareStatement("select  * from tb1_dept where id = ?");
+           preState = connect.prepareStatement(sql);
+           preState.setInt(1, Integer.parseInt(SMID.toString()));
+           
+//           resultSet = statement.executeQuery("select  * from RISKINFO_CLAIM where SERIALNO ='26'");
+//           resultSet = statement.executeQuery("select * from SMDTV_45 where SMID=3");
+           	
+           resultSet = preState.executeQuery();        
+
+          
+           while (resultSet.next()){
+//        	   byte[] SMGEOMETRY = null;
+               Integer  SMID1 = resultSet.getInt("SMID");
+               Integer SMKEY = resultSet.getInt("SMKEY");
+               BigDecimal SMSDRIW = new BigDecimal(resultSet.getString("SMSDRIW"));
+               BigDecimal SMSDRIN = new BigDecimal(resultSet.getString("SMSDRIN"));
+               BigDecimal SMSDRIE = new BigDecimal(resultSet.getString("SMSDRIE"));
+               BigDecimal SMSDRIS = new BigDecimal(resultSet.getString("SMSDRIS"));
+               BigDecimal SMGRANULE = new BigDecimal(resultSet.getString("SMGRANULE"));
+               byte[] SMGEOMETRY =resultSet.getBytes("SMGEOMETRY");
+               Integer  SMUSERID = resultSet.getInt("SMUSERID");
+               Integer  SMLIBTILEID = resultSet.getInt("SMLIBTILEID");
+               BigDecimal SMAREA = new BigDecimal(resultSet.getString("SMAREA"));
+               BigDecimal SMPERIMETER = new BigDecimal(resultSet.getString("SMPERIMETER"));
+               
+               String  ADMINCODE = resultSet.getString("ADMINCODE");
+               String  KIND = resultSet.getString("KIND");
+               String  NAME = resultSet.getString("NAME");
+               String  PY = resultSet.getString("PY");
+               String  CITYADCODE = resultSet.getString("CITYADCODE");
+               String  PROADCODE = resultSet.getString("PROADCODE");
+               BigDecimal CENTERX = new BigDecimal(resultSet.getString("CENTERX"));
+               BigDecimal CENTERY = new BigDecimal(resultSet.getString("CENTERY"));
+               BigDecimal LEVELFLAG = new BigDecimal(resultSet.getString("LEVELFLAG"));
+               
+               String  PROVINCENAME = resultSet.getString("PROVINCENAME");
+               String  CITYNAME = resultSet.getString("CITYNAME");
+               System.out.println(SMID+"   "+SMKEY+"   "+SMSDRIW); 
+               
+           }
+       } catch (Exception e) {
+           e.printStackTrace();
+       }finally {
+               try {
+                   if (resultSet!=null) resultSet.close();
+                   if (preState!=null) preState.close();
+                   if (connect!=null) connect.close();
+               } catch (SQLException e) {
+                   e.printStackTrace();
+               }
+       }
+	}
 	
 	
 }
