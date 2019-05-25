@@ -17,6 +17,6 @@ public class ScheduledDemo {
 	*/
 	@Scheduled(cron="0/20 * * * * ?")
 	public void scheduledMethod(){
-		System.out.println("定时器被触发"+new Date());
+//		System.out.println("定时器被触发"+new Date());
 	}
 }

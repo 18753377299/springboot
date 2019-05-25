@@ -27,6 +27,7 @@ import com.supermap.data.DatasourceConnectionInfo;
 import com.supermap.data.EncodeType;
 import com.supermap.data.EngineType;
 import com.supermap.data.Feature;
+import com.supermap.data.GeoRegion;
 import com.supermap.data.Geometrist;
 import com.supermap.data.Geometry;
 import com.supermap.data.QueryParameter;
@@ -163,13 +164,15 @@ public class FileUploadController {
 	}
 	
 	/**
-	 * iobjectjava 直接把后台的多个面数据转换成一个面数据
-	 * @throws IOException 
-	 * @throws IllegalStateException 
-	 * */
+	 * @功能：iobjectjava 直接把后台的多个面数据转换成一个面数据
+	 * @param RiskMapInsuredModify
+	 * @return AjaxResult
+	 * @author liqiankun
+	 * @时间：20190515
+	 * @修改记录：
+	 */
 	@RequestMapping(value="/returnGeometrist",method= {RequestMethod.POST,RequestMethod.GET})
-	public ResponseResult  returnGeometrist(@RequestBody RiskClaimVo riskClaimVo) {
-		System.out.println(riskClaimVo.getGeometrys());
+	public ResponseResult  returnGeometrist() {
 		ResponseResult responseResult =new ResponseResult();
 		
 		Workspace workspace = new Workspace();
@@ -181,9 +184,17 @@ public class FileUploadController {
 //		TF_7M
 	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("TF_7M");
 	    
+	    DatasetVector datasetVector_10 = (DatasetVector)datasource.getDatasets().get("TF_10M");
+	    
 	    String filter = "TFBH = 201822";
 	    Recordset recordset_7 = datasetVector_7.query(filter,CursorType.DYNAMIC ); 
+	    Recordset recordset_10 = datasetVector_10.query(filter,CursorType.DYNAMIC ); 
+	    
 	    Map<Integer,Feature>  features= recordset_7.getAllFeatures();
+	    
+	    Map<Integer,Feature>  features_10= recordset_10.getAllFeatures();
+	    features.putAll(features_10);
+	    
 		String geometryString = "";
 		List<Geometry> geoList=new ArrayList<Geometry>();
 	    if(recordset_7.getRecordCount()>0){
@@ -204,7 +215,10 @@ public class FileUploadController {
 	    }
 	    responseResult.setResult(geometryString);
         
-        
+	    if(recordset_10!=null){
+	    	recordset_10.close();
+	    	recordset_10.dispose();
+		}
         if(recordset_7!=null){
         	recordset_7.close();
         	recordset_7.dispose();
@@ -212,6 +226,10 @@ public class FileUploadController {
 //	    if(fieldInfoNew!=null){
 //	    	fieldInfoNew.dispose();
 //		}
+        
+        if(datasetVector_10!=null){
+        	datasetVector_10.close();
+		}
 		if(datasetVector_7!=null){
 			datasetVector_7.close();
 		}
@@ -243,7 +261,8 @@ public class FileUploadController {
 		Datasource datasource =MapUtils.connectDataSource(workspace,datasourceconnection,iobjectJavaServer,iobjectJavaDatabase,iobjectJavaUser,iobjectJavaPassword);
 		// 获取的面数据集
 //		TF_7M
-	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("UnionTF_7_10");
+//	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("UnionTF_7_10");
+	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("NewDataset");
 	    // 获取的点数据集
 	    DatasetVector datasetVector = (DatasetVector)datasource.getDatasets().get("RISKMAP_ADDRESS");
 	    
@@ -254,13 +273,18 @@ public class FileUploadController {
 	    QueryParameter parameter = new QueryParameter();
 		parameter.setSpatialQueryObject(datasetVector_7);
 //		parameter.setAttributeFilter("SmID<100000");
+		parameter.setAttributeFilter("VALIDSTATUS=1");
 		parameter.setSpatialQueryMode(SpatialQueryMode.INTERSECT);
 		
 		Recordset queryRecordset = datasetVector.query(parameter);
+		
 		System.out.println("相交之后的点的数量："+queryRecordset.getRecordCount());
 		
 		List<SMDTV> smdtvList = new ArrayList<SMDTV>();
+	    Map<Object, List<SMDTV>>  map = new HashMap<Object, List<SMDTV>>();
+	    
 		int i=0;
+	    long startDate = System.currentTimeMillis();
 		while (!queryRecordset.isEOF()) {
 			i++;
 			SMDTV smdtv =new SMDTV();
@@ -272,29 +296,36 @@ public class FileUploadController {
 			smdtv.setPointx_2000(POINTX_2000.toString());
 			smdtv.setPointy_2000(POINTY_2000.toString());
 			smdtvList.add(smdtv);
+			map.put(SMID, smdtvList);
 //	        recordset.setValues(values);
 			queryRecordset.moveNext();
-			System.out.println("=============循环次数=============:"+i);
 	    }
+		
+		long endDate = System.currentTimeMillis();
+		System.out.println("==============总共的运行时间是 ："+(endDate-startDate));
 		responseResult.setResult(smdtvList);
 		responseResult.setStatusCode("1");
 		
-//		Map<Integer,Feature>  features= queryRecordset.getAllFeatures();
-//		List<SMDTV> smdtvList = new ArrayList<SMDTV>();
-//		if(queryRecordset.getRecordCount()>0){
-//			for(Feature feature:features.values()){
-//				SMDTV smdtv =new SMDTV();
-//				String  POINTX_2000 = feature.getString("POINTX_2000");
-//				String  POINTY_2000 = feature.getString("POINTY_2000");
-//				smdtv.setPointx_2000(POINTX_2000);
-//				smdtv.setPointy_2000(POINTY_2000);
-//				smdtvList.add(smdtv);
-//			}
-//			responseResult.setResult(smdtvList);
-//			responseResult.setStatusCode("1");
-//		}else {
-//			System.out.println("================没有数据");
-//		}
+		long startDate1 = System.currentTimeMillis();
+		Map<Integer,Feature>  features= queryRecordset.getAllFeatures();
+		List<SMDTV> smdtvList1 = new ArrayList<SMDTV>();
+		if(queryRecordset.getRecordCount()>0){
+			
+			for(Feature feature:features.values()){
+				SMDTV smdtv =new SMDTV();
+				String  POINTX_2000 = feature.getString("POINTX_2000");
+				String  POINTY_2000 = feature.getString("POINTY_2000");
+				smdtv.setPointx_2000(POINTX_2000);
+				smdtv.setPointy_2000(POINTY_2000);
+				smdtvList1.add(smdtv);
+			}
+			responseResult.setResult(smdtvList);
+			responseResult.setStatusCode("1");
+		}else {
+			System.out.println("================没有数据");
+		}
+		long endDate1 = System.currentTimeMillis();
+		System.out.println("==============总共的运行时间2是 ："+(endDate1-startDate1));
 		
 		System.out.println("================一切都结束了");
 		
@@ -312,6 +343,140 @@ public class FileUploadController {
 		if(datasetVector_7!=null){
 			datasetVector_7.close();
 		}
+	    if(datasource!=null){
+			datasource.close();
+		}
+	    if(datasourceconnection!=null){
+			datasourceconnection.dispose();
+		}
+		if(workspace!=null){
+			// 关闭工作空间
+			workspace.close();
+			// 释放该对象所占用的资源
+			workspace.dispose();
+		}
+		
+		return responseResult;
+	}
+	
+	@RequestMapping(value="/operatePointInfo1",method= {RequestMethod.POST,RequestMethod.GET})
+	public ResponseResult  operatePointInfo1() {
+		
+		ResponseResult responseResult =new ResponseResult();
+		
+		Workspace workspace = new Workspace();
+		// 定义数据源连接信息，假设以下所有数据源设置都存在
+	    DatasourceConnectionInfo datasourceconnection = new  DatasourceConnectionInfo();
+		//进行数据源的连接
+		Datasource datasource =MapUtils.connectDataSource(workspace,datasourceconnection,iobjectJavaServer,iobjectJavaDatabase,iobjectJavaUser,iobjectJavaPassword);
+		// 获取的面数据集
+//		TF_7M
+//	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("UnionTF_7_10");
+//	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("NewDataset");
+	    DatasetVector datasetVector_p = (DatasetVector)datasource.getDatasets().get("china_province");
+	    DatasetVector datasetVector_new = (DatasetVector)datasource.getDatasets().get("TF_New");
+	    
+	    QueryParameter parameter_p = new QueryParameter();
+		parameter_p.setSpatialQueryObject(datasetVector_new);
+		parameter_p.setSpatialQueryMode(SpatialQueryMode.INTERSECT);
+	    // 获取的点数据集
+	    DatasetVector datasetVector_address = (DatasetVector)datasource.getDatasets().get("RISKMAP_ADDRESS");
+	    
+	    Recordset queryRecordset_address_intersect = datasetVector_address.query(parameter_p);
+		System.out.println("======查出的相交的有效的标的的个数======"+queryRecordset_address_intersect.getRecordCount());
+		//查询省市面信息和新增的面数据相交的信息
+		QueryParameter parameter_p1 = new QueryParameter();
+		parameter_p1.setSpatialQueryObject(datasetVector_new);
+//		parameter_p1.setAttributeFilter("ADMINCODE=450000");
+		parameter_p1.setSpatialQueryMode(SpatialQueryMode.INTERSECT);
+		Recordset queryRecordset_p1 = datasetVector_p.query(parameter_p1);
+		System.out.println("======查出的省份的个数======"+queryRecordset_p1.getRecordCount());
+		
+		while (!queryRecordset_p1.isEOF()){
+			DatasetVector datasetVector_p1 = queryRecordset_p1.getDataset();
+			
+			GeoRegion geoRegion=(GeoRegion)queryRecordset_p1.getGeometry();
+			DatasetVector datasetVector_address_intersect= queryRecordset_address_intersect.getDataset();
+//		    DatasetVector datasetVector = (DatasetVector)datasource.getDatasets().get("BB_1");
+//		    int count =  datasetVector.getRecordCount();
+//		    System.out.println("RISKMAP_ADDRESS总数为：" + count);
+		    
+		    QueryParameter parameter = new QueryParameter();
+//			parameter.setSpatialQueryObject(datasetVector_p1);
+			parameter.setSpatialQueryObject(geoRegion);
+//			parameter.setAttributeFilter("SmID<100000");
+//			parameter.setAttributeFilter("VALIDSTATUS=1");
+			parameter.setSpatialQueryMode(SpatialQueryMode.INTERSECT);
+			
+			Recordset queryRecordset = datasetVector_address_intersect.query(parameter);
+			
+			System.out.println("相交之后的点的数量："+queryRecordset.getRecordCount());
+			
+			
+			queryRecordset_p1.moveNext();
+		}
+		
+		
+//		List<SMDTV> smdtvList = new ArrayList<SMDTV>();
+//	    Map<Object, List<SMDTV>>  map = new HashMap<Object, List<SMDTV>>();
+//	    
+//		int i=0;
+//	    long startDate = System.currentTimeMillis();
+//		while (!queryRecordset.isEOF()) {
+//			i++;
+//			SMDTV smdtv =new SMDTV();
+//			Object  SMID  = queryRecordset.getFieldValue("SMID");
+//			Object  POINTX_2000  = queryRecordset.getFieldValue("POINTX_2000");
+//			Object  POINTY_2000  = queryRecordset.getFieldValue("POINTY_2000");
+//			
+////			MapUtils.queryCorporePInfo(SMID,POINTX_2000,POINTY_2000);
+//			smdtv.setPointx_2000(POINTX_2000.toString());
+//			smdtv.setPointy_2000(POINTY_2000.toString());
+//			smdtvList.add(smdtv);
+//			map.put(SMID, smdtvList);
+////	        recordset.setValues(values);
+//			queryRecordset.moveNext();
+//	    }
+//		
+//		long endDate = System.currentTimeMillis();
+//		System.out.println("==============总共的运行时间是 ："+(endDate-startDate));
+//		responseResult.setResult(smdtvList);
+//		responseResult.setStatusCode("1");
+//		
+//		long startDate1 = System.currentTimeMillis();
+//		Map<Integer,Feature>  features= queryRecordset.getAllFeatures();
+//		List<SMDTV> smdtvList1 = new ArrayList<SMDTV>();
+//		if(queryRecordset.getRecordCount()>0){
+//			
+//			for(Feature feature:features.values()){
+//				SMDTV smdtv =new SMDTV();
+//				String  POINTX_2000 = feature.getString("POINTX_2000");
+//				String  POINTY_2000 = feature.getString("POINTY_2000");
+//				smdtv.setPointx_2000(POINTX_2000);
+//				smdtv.setPointy_2000(POINTY_2000);
+//				smdtvList1.add(smdtv);
+//			}
+//			responseResult.setResult(smdtvList);
+//			responseResult.setStatusCode("1");
+//		}else {
+//			System.out.println("================没有数据");
+//		}
+//		long endDate1 = System.currentTimeMillis();
+//		System.out.println("==============总共的运行时间2是 ："+(endDate1-startDate1));
+		
+		System.out.println("================一切都结束了");
+		
+//		if(parameter!=null){
+//			parameter.dispose();
+//		}
+		
+//	    if(datasetVector!=null){
+//	    	datasetVector.close();
+//		}
+	    
+//		if(datasetVector_7!=null){
+//			datasetVector_7.close();
+//		}
 	    if(datasource!=null){
 			datasource.close();
 		}
