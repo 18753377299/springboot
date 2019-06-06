@@ -46,7 +46,8 @@ public class FileUploadController {
 	private static final  String  iobjectJavaServer = "10.10.68.248:1521/orcl";
 	private static final  String  iobjectJavaDatabase = "riskcontrol";
 	private static final  String  iobjectJavaUser = "riskcontrol";
-	private static final  String  iobjectJavaPassword = "riskcontrol";
+//	private static final  String  iobjectJavaPassword = "riskcontrol";
+	private static final  String  iobjectJavaPassword = "Picc_2019risk";
 	private static final  String  riskMap_address  = "SMDTV_60";
 	
 	/**
@@ -173,6 +174,7 @@ public class FileUploadController {
 	 */
 	@RequestMapping(value="/returnGeometrist",method= {RequestMethod.POST,RequestMethod.GET})
 	public ResponseResult  returnGeometrist() {
+		System.out.println("===============begin================");
 		ResponseResult responseResult =new ResponseResult();
 		
 		Workspace workspace = new Workspace();
@@ -182,9 +184,9 @@ public class FileUploadController {
 		Datasource datasource =MapUtils.connectDataSource(workspace,datasourceconnection,iobjectJavaServer,iobjectJavaDatabase,iobjectJavaUser,iobjectJavaPassword);
 		// 获取的面数据集
 //		TF_7M
-	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("TF_7M");
+	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("TFUNION_7M");
 	    
-	    DatasetVector datasetVector_10 = (DatasetVector)datasource.getDatasets().get("TF_10M");
+	    DatasetVector datasetVector_10 = (DatasetVector)datasource.getDatasets().get("TFUNION_10M");
 	    
 	    String filter = "TFBH = 201822";
 	    Recordset recordset_7 = datasetVector_7.query(filter,CursorType.DYNAMIC ); 
