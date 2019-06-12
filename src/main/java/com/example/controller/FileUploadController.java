@@ -177,77 +177,75 @@ public class FileUploadController {
 		System.out.println("===============begin================");
 		ResponseResult responseResult =new ResponseResult();
 		
-		Workspace workspace = new Workspace();
-		// 定义数据源连接信息，假设以下所有数据源设置都存在
-	    DatasourceConnectionInfo datasourceconnection = new  DatasourceConnectionInfo();
-		//进行数据源的连接
-		Datasource datasource =MapUtils.connectDataSource(workspace,datasourceconnection,iobjectJavaServer,iobjectJavaDatabase,iobjectJavaUser,iobjectJavaPassword);
-		// 获取的面数据集
-//		TF_7M
-	    DatasetVector datasetVector_7 = (DatasetVector)datasource.getDatasets().get("TFUNION_7M");
-	    
-	    DatasetVector datasetVector_10 = (DatasetVector)datasource.getDatasets().get("TFUNION_10M");
-	    
-	    String filter = "TFBH = 201822";
-	    Recordset recordset_7 = datasetVector_7.query(filter,CursorType.DYNAMIC ); 
-	    Recordset recordset_10 = datasetVector_10.query(filter,CursorType.DYNAMIC ); 
-	    
-	    Map<Integer,Feature>  features= recordset_7.getAllFeatures();
-	    
-	    Map<Integer,Feature>  features_10= recordset_10.getAllFeatures();
-	    features.putAll(features_10);
-	    
-		String geometryString = "";
-		List<Geometry> geoList=new ArrayList<Geometry>();
-	    if(recordset_7.getRecordCount()>0){
-	    	for(Feature feature:features.values()){
-	    		Geometry geometry= feature.getGeometry(); 
-	    		geoList.add(geometry);
+		try {
+			Workspace workspace = new Workspace();
+			// 定义数据源连接信息，假设以下所有数据源设置都存在
+			DatasourceConnectionInfo datasourceconnection = new DatasourceConnectionInfo();
+			//进行数据源的连接
+			Datasource datasource = MapUtils.connectDataSource(workspace, datasourceconnection, iobjectJavaServer,
+					iobjectJavaDatabase, iobjectJavaUser, iobjectJavaPassword);
+			// 获取的面数据集
+			//		TF_7M
+			DatasetVector datasetVector_7 = (DatasetVector) datasource.getDatasets().get("TFUNION_7M");
+			DatasetVector datasetVector_10 = (DatasetVector) datasource.getDatasets().get("TFUNION_10M");
+			String filter = "TFBH = 201822";
+			Recordset recordset_7 = datasetVector_7.query(filter, CursorType.DYNAMIC);
+			Recordset recordset_10 = datasetVector_10.query(filter, CursorType.DYNAMIC);
+			Map<Integer, Feature> features = recordset_7.getAllFeatures();
+			Map<Integer, Feature> features_10 = recordset_10.getAllFeatures();
+			features.putAll(features_10);
+			String geometryString = "";
+			List<Geometry> geoList = new ArrayList<Geometry>();
+			if (recordset_7.getRecordCount() > 0) {
+				for (Feature feature : features.values()) {
+					Geometry geometry = feature.getGeometry();
+					geoList.add(geometry);
+				}
+
+				Geometry geometry = geoList.get(0);
+				for (int j = 1; j < geoList.size(); j++) {
+					Geometry geome = geoList.get(j);
+					geometry = Geometrist.union(geometry, geome);
+				}
+				geometryString = Toolkit.GemetryToGeoJson(geometry);
+				System.out.println(geometryString);
+
+			} else {
+				System.out.println("==============没有数据");
 			}
-	    	
-	    	Geometry geometry = geoList.get(0);
-	    	for (int j = 1;j<geoList.size();j++) {
-    			Geometry geome= geoList.get(j);
-    			geometry = Geometrist.union(geometry, geome);
-    		}
-	    	geometryString = Toolkit.GemetryToGeoJson(geometry);
-	    	
-	    }else {
-	    	System.out.println("==============没有数据");
-	    }
-	    responseResult.setResult(geometryString);
-        
-	    if(recordset_10!=null){
-	    	recordset_10.close();
-	    	recordset_10.dispose();
+			responseResult.setResult(geometryString);
+			if (recordset_10 != null) {
+				recordset_10.close();
+				recordset_10.dispose();
+			}
+			if (recordset_7 != null) {
+				recordset_7.close();
+				recordset_7.dispose();
+			}
+			//	    if(fieldInfoNew!=null){
+			//	    	fieldInfoNew.dispose();
+			//		}
+			if (datasetVector_10 != null) {
+				datasetVector_10.close();
+			}
+			if (datasetVector_7 != null) {
+				datasetVector_7.close();
+			}
+			if (datasource != null) {
+				datasource.close();
+			}
+			if (datasourceconnection != null) {
+				datasourceconnection.dispose();
+			}
+			if (workspace != null) {
+				// 关闭工作空间
+				workspace.close();
+				// 释放该对象所占用的资源
+				workspace.dispose();
+			} 
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-        if(recordset_7!=null){
-        	recordset_7.close();
-        	recordset_7.dispose();
-		}
-//	    if(fieldInfoNew!=null){
-//	    	fieldInfoNew.dispose();
-//		}
-        
-        if(datasetVector_10!=null){
-        	datasetVector_10.close();
-		}
-		if(datasetVector_7!=null){
-			datasetVector_7.close();
-		}
-	    if(datasource!=null){
-			datasource.close();
-		}
-	    if(datasourceconnection!=null){
-			datasourceconnection.dispose();
-		}
-		if(workspace!=null){
-			// 关闭工作空间
-			workspace.close();
-			// 释放该对象所占用的资源
-			workspace.dispose();
-		}
-		
 		return responseResult;
 	}
 	
