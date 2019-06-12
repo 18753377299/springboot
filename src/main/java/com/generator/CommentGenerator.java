@@ -1,4 +1,4 @@
-package com.generator;
+package  com.generator;
 
 import org.mybatis.generator.api.IntrospectedColumn;
 import org.mybatis.generator.api.IntrospectedTable;
