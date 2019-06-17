@@ -9,7 +9,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.example.SpringbootApplication;
+import com.SpringbootApplication;
 import com.example.po.Users;
 
 @RunWith(SpringJUnit4ClassRunner.class)
